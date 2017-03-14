@@ -1,0 +1,1 @@
+{"virtualbox":{"/var/www/html/myproject":{"guestpath":"/var/www/html/myproject","hostpath":"E:/Working/Php-Netbean/vagrant_ubuntu/manage_money","disabled":false,"__vagrantfile":true},"/vagrant":{"guestpath":"/vagrant","hostpath":"E:/Working/Php-Netbean/vagrant_ubuntu","disabled":false,"__vagrantfile":true}}}
