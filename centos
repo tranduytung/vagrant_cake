@@ -1,0 +1,31 @@
+## 6. プロキシの設定をする
+会社のネットは大体プロキシを通しているので、プロキシの設定が必要
+### VirtualBoxのプロキシ設定
+仮想マシン起動中にメニュー「ファイル」から「環境設定」を開く
+「プロキシー」タブからプロキシの設定を入力する
+### yumのプロキシ設定
+
+```
+echo 'proxy=http://user-proxy.put:8080' >> /etc/yum.conf
+```
+### curlのプロキシ設定
+
+```
+echo 'proxy = "http://user-proxy.put:8080"' >> /root/.curlrc
+```
+
+### wgetのプロキシ設定
+#### インストール
+
+```
+yum install wget -y
+```
+
+#### プロキシ設定
+
+```
+echo 'http_proxy=http://user-proxy.put:8080
+https_proxy=http://user-proxy.put:8080
+ftp_proxy=http://user-proxy.put:8080' >> /etc/wgetrc
+
+source /etc/wgetrc
