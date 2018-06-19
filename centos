@@ -1,3 +1,112 @@
+# 概要
+ローカル開発環境サーバとして使えるLinux環境を構築する。
+※CUIなのはPCのスペックが低いから…
+# 手順
+## 1. VirtualBoxをインストールする
+Oracle VM VirtualBoxのダウンロードページからインストーラを取得し、インストール
+https://www.virtualbox.org/wiki/Downloads
+## 2. CentOSを用意する
+~~CentOSのダウンロードページからDVD ISOを取得~~
+~~https://www.centos.org/download/~~  
+共有ディレクトリから取得でいい
+```
+\\da.ad-srv1\DAC\システム\999_個人ワーク\yinoue\ローカル環境構築
+CentOS-7-x86_64-DVD-1611.iso
+```
+## 3. 仮想マシンを作成する
+VirtualBoxを起動し、メニュー左上の「新規」をクリック
+タイプを「Linux」
+バージョンを「Red Hat(64-bit)」とする
+
+メモリサイズを設定する
+後で増やせるので、必要なサイズが云々は無視してとりあえず512MBとする
+
+仮想ハードディスクを作成する
+
+VDI形式でいい
+
+可変サイズの方が後で楽
+
+あとで増やせるので適当に決める。
+
+これで仮想マシンが作成される
+### 64bitが選択できない場合
+BIOSの設定が必要となる。下記URLを参考に設定し、再度手順3に戻る
+>VirtualBox：仮想マシンの作成で64bit OSを選択可能にする方法 - 情報科学屋さんを目指す人のメモ
+http://did2memo.net/2015/07/10/virtualbox-64-bit-os/
+
+## 4. 設定を変更する
+追加した仮想マシンを選択し、メニュー左上の「設定」をクリック
+### インストールのための設定
+「ストレージ」タブでディスク+アイコンをクリックし光学ドライブを追加
+「ディスクを選択」をクリック
+
+用意したISOファイルを選択
+
+追加されていることを確認する
+### ネットワーク設定
+
+「ネットワーク」タブからアダプター1の設定を確認する
+割り当てが「NAT」になっていなければ「NAT」に変更する
+
+「高度」をクリックし、ポートフォワーディングの設定をする
+
+- 「名前」はデフォルトのままでOK
+- 「プロトコル」は「TCP」を指定
+- 「ホストポート」は使ってなさそうな値を指定
+- 「ゲストポート」はSSH接続用なので22固定
+
+※IP関連は入力不要
+
+これでPoderosa等からの接続が楽になる気がする
+
+|ホスト名|ポート|
+|:-----|:-----|
+|localhost|指定したゲストポート(図の例だと4649)|
+
+でSSH接続できるようになる
+
+アダプター2は「ホストオンリーアダプター」とする
+### 共有フォルダの設定
+「共有フォルダー」タブ右にあるフォルダ+アイコンをクリック
+
+「フォルダーのパス」から共有フォルダとして使いたいフォルダのパスを指定し、「自動マウント」にチェックを入れて「OK」をクリック
+
+追加されていることを確認する
+
+これで設定は完了なので「OK」をクリックして設定画面を閉じる
+## 5. CentOSをインストールする
+追加した仮想マシンを選択し、メニュー左上の「起動」をクリック
+
+「Install CentOS Linux7」を十字キーで選択し、エンターで決定
+
+言語は日本語にしておく
+「続行」をクリック
+
+インストール設定画面が出てくるので、順に設定していく
+### ネットワーク設定
+「ネットワークとホスト名」をクリック
+
+イーサネットを2つとも「オン」に変更
+「完了」をクリック
+※赤枠で囲っているIPアドレスは、Windowsのhosts設定などに必要となる
+### インストールするソフトの設定
+「ソフトウェアの選択」をクリック
+「最小限のインストール」を選択  
+右の「開発者ツール」にチェック
+「完了」をクリック
+### インストール先設定
+「インストール先」をクリック
+特に変更が必要ないならそのまま「完了」をクリック
+### インストール実行
+「インストール開始」をクリック
+
+インストール中にrootのパスワード設定とユーザ作成ができるので設定しておく
+※ここでWindowsのアカウントと同じユーザ名・パスワードでアカウントを作成しておくとSambaが楽に使える
+### インストールが完了
+インストールが完了したら「再起動」をクリック
+上を選択しエンター
+rootでログインできるか確認する
 ## 6. プロキシの設定をする
 会社のネットは大体プロキシを通しているので、プロキシの設定が必要
 ### VirtualBoxのプロキシ設定
@@ -29,19 +138,42 @@ https_proxy=http://user-proxy.put:8080
 ftp_proxy=http://user-proxy.put:8080' >> /etc/wgetrc
 
 source /etc/wgetrc
+```
+## 7. 不便なので色々やっておく
+### vimのインストール
 
+```
+yum install vim -y
+```
+
+### ifconfigなどのインストール
+
+```
+yum install net-tools -y
+```
+### コマンドのアップデート
+
+```
+yum upgrade -y
+```
+### リポジトリ追加
+
+```
+yum install epel-release -y
+rpm -Uvh http://rpms.famillecollet.com/enterprise/remi-release-7.rpm
+
+```
 ## 8. 共有フォルダの設定をする
 ### VirtualBoxの共有フォルダ
 Guest Additionsのインストール準備をする
 
 ```
+yum groupinstall "Development Tools" -y
+yum install kernel-devel kernel-headers -y
 export KERN_DIR=/usr/src/kernels/3.10.0-693.11.1.el7.x86_64
 ```
-再起動
-```
-reboot
-```
-メニュー「デバイス」から「Guest Additions CDイメージの挿入」をクリック  
+メニュー「デバイス」から「Guest Additions CDイメージの挿入」をクリック
+
 マウント用ディレクトリ作成
 
 ```
@@ -73,3 +205,51 @@ ll /media/
 ```
 gpasswd -a [ユーザ名] vboxsf
 ```
+
+## 9. Poderosaからの接続
+ポートフォワーディングで指定したポートを指定すればPoderosaから操作ができるようになる
+
+## 10. SELinux無効化
+ローカル開発環境なので不要  
+disabledに変更
+
+```
+vim /etc/selinux/config
+```
+```
+#SELINUX=enforcing
+SELINUX=disabled
+```
+
+## IP固定
+```
+vim /etc/sysconfig/network-scripts/ifcfg-enp0s8
+```
+```
+TYPE=Ethernet
+BOOTPROTO=none
+DEFROUTE=yes
+PEERDNS=yes
+PEERROUTES=yes
+IPV4_FAILURE_FATAL=yes
+IPV6INIT=no
+IPV6_AUTOCONF=yes
+IPV6_DEFROUTE=yes
+IPV6_PEERDNS=yes
+IPV6_PEERROUTES=yes
+IPV6_FAILURE_FATAL=no
+IPV6_ADDR_GEN_MODE=stable-privacy
+NAME=enp0s8
+UUID=******* ←ここはいじらない
+DEVICE=enp0s8
+ONBOOT=yes
+IPADDR=192.168.56.200 ←最後の200はご自由に
+PREFIX=24
+```
+```
+service NetworkManager restart
+chkconfig NetworkManager on
+
+ifconfig
+```
+※P-Navi環境構築手順に続く
