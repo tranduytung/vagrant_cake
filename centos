@@ -29,3 +29,47 @@ https_proxy=http://user-proxy.put:8080
 ftp_proxy=http://user-proxy.put:8080' >> /etc/wgetrc
 
 source /etc/wgetrc
+
+## 8. 共有フォルダの設定をする
+### VirtualBoxの共有フォルダ
+Guest Additionsのインストール準備をする
+
+```
+export KERN_DIR=/usr/src/kernels/3.10.0-693.11.1.el7.x86_64
+```
+再起動
+```
+reboot
+```
+メニュー「デバイス」から「Guest Additions CDイメージの挿入」をクリック  
+マウント用ディレクトリ作成
+
+```
+mkdir /mnt/cdrom/
+```
+マウント
+
+```
+mount -r /dev/cdrom/ /mnt/cdrom/
+```
+インストール
+
+```
+cd /mnt/cdrom/
+/bin/sh VBoxLinuxAdditions.run
+```
+再起動
+
+```
+reboot
+```
+共有フォルダ(sf_[指定したディレクトリ名])が存在することを確認
+
+```
+ll /media/
+```
+共有フォルダにアクセスできるように一般ユーザを「vboxsf」グループに参加させる
+
+```
+gpasswd -a [ユーザ名] vboxsf
+```
